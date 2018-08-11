@@ -12,11 +12,11 @@ function git_prompt_dir() {
   if [ -z "$__GIT_PROMPT_DIR" ]; then
     local SOURCE="${BASH_SOURCE[0]}"
     while [ -h "$SOURCE" ]; do
-      local DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+      local DIR="$( command cd -P "$( dirname "$SOURCE" )" && pwd )"
       SOURCE="$(readlink "$SOURCE")"
       [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
     done
-    __GIT_PROMPT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    __GIT_PROMPT_DIR="$( command cd -P "$( dirname "$SOURCE" )" && pwd )"
   fi
 }
 
@@ -487,7 +487,7 @@ function updatePrompt() {
   export __GIT_PROMPT_IGNORE_SUBMODULES=${GIT_PROMPT_IGNORE_SUBMODULES}
 
   if [ -z "${GIT_PROMPT_SHOW_UNTRACKED_FILES}" ]; then
-    export __GIT_PROMPT_SHOW_UNTRACKED_FILES=all
+    export __GIT_PROMPT_SHOW_UNTRACKED_FILES=normal
   else
     export __GIT_PROMPT_SHOW_UNTRACKED_FILES=${GIT_PROMPT_SHOW_UNTRACKED_FILES}
   fi
@@ -656,6 +656,8 @@ function gp_install_prompt {
   if [ -z "$PROMPT_COMMAND" ]; then
     PROMPT_COMMAND=setGitPrompt
   else
+    PROMPT_COMMAND="${PROMPT_COMMAND//$'\n'/;}" # convert all new lines to semi-colons
+    PROMPT_COMMAND=${PROMPT_COMMAND#\;}; # remove leading semi-colon
     PROMPT_COMMAND=${PROMPT_COMMAND%% }; # remove trailing spaces
     PROMPT_COMMAND=${PROMPT_COMMAND%\;}; # remove trailing semi-colon
 
